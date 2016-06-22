@@ -20,7 +20,7 @@ func main() {
 
     e := echo.New()
     e.Pre(middleware.RemoveTrailingSlash())
-	e.SetRenderer(handlers.GetTemplate(rootPath))
+    e.SetRenderer(handlers.GetTemplate(rootPath))
 
     e.SetHTTPErrorHandler(handlers.ErrorHandler)
 

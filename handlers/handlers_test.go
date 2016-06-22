@@ -12,14 +12,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var rootPath = ".." 
+var (
+	rootPath = ".." 
+	h = &Handler{}
+)
 
-func resetContext(e *echo.Echo, rec *httptest.ResponseRecorder, c echo.Context) (*httptest.ResponseRecorder, echo.Context) {
+func resetContext(e *echo.Echo, rec **httptest.ResponseRecorder, c *echo.Context)  {
 
-	rec = httptest.NewRecorder()
-	c = e.NewContext(standard.NewRequest(new(http.Request), e.Logger()), standard.NewResponse(rec, e.Logger()))
-
-	return rec,c
+	*rec = httptest.NewRecorder()
+	*c = e.NewContext(standard.NewRequest(new(http.Request), e.Logger()), standard.NewResponse(*rec, e.Logger()))
 }
 
 func TestHello(t *testing.T) {
@@ -32,7 +33,6 @@ func TestHello(t *testing.T) {
 	req := new(http.Request)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
-	h := &Handler{}
 
 	c.SetPath("/hello/:name")
 	c.SetParamNames("name")
@@ -42,14 +42,15 @@ func TestHello(t *testing.T) {
 		assert.Equal(t, "Hello mister : booboo!", rec.Body.String())
 	}
 
-	rec, c = resetContext(e,rec,c)
+    //fmt.Printf("%T / %T / %T",e,rec,c)
+	resetContext(e,&rec,&c)
 	c.SetPath("/hello/")
 	if assert.NoError(t, h.Hello(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "Hello mister : John Doe!", rec.Body.String())
 	}
 
-	rec, c = resetContext(e,rec,c)
+	resetContext(e,&rec,&c)
 	c.SetPath("/hello")
 	if assert.NoError(t, h.Hello(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
